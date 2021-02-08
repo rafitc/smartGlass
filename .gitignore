@@ -3,3 +3,7 @@
 
 # Ignore python modules folder
 aws
+
+key.py
+
+rootkey.csv
