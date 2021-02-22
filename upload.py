@@ -22,7 +22,7 @@ def upload_to_aws(local_file, bucket, s3_file):
         return False
 
 
-#uploaded = upload_to_aws('3.png', 'mytextextract', '3.png')
+uploaded = upload_to_aws('3.png', 'mytextextract', '3.png')
 
 def delete_from_s3(bucket, model):
     try:
@@ -36,7 +36,7 @@ def delete_from_s3(bucket, model):
         return False
 
 delete_from_s3('mytextextract', 'up.jpg')
-
+'''
 def dl(bucket, key, model_path):
     try:
         s3 = boto3.client(
@@ -48,5 +48,5 @@ def dl(bucket, key, model_path):
         return False
     return True
 
-#dl('mytextextract', '3.png', '/')
-
+dl('mytextextract', '3.png', '/')
+'''
