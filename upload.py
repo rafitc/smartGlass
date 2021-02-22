@@ -22,7 +22,7 @@ def upload_to_aws(local_file, bucket, s3_file):
         return False
 
 
-#uploaded = upload_to_aws('3.png', 'mytextextract', '3.png')
+uploaded = upload_to_aws('3.PNG', 'mytextextract', '3.png')
 
 def delete_from_s3(bucket, model):
     try:
@@ -35,7 +35,7 @@ def delete_from_s3(bucket, model):
         print(str(ex))
         return False
 
-delete_from_s3('mytextextract', 'up.jpg')
+#delete_from_s3('mytextextract', 'up.jpg')
 
 def dl(bucket, key, model_path):
     try:

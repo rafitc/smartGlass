@@ -142,7 +142,7 @@ import boto3
 
 # Document
 s3BucketName = "mytextextract"
-documentName = "1.jpg"
+documentName = "3.png"
 
 # Amazon Textract client
 textract = boto3.client('textract', region_name='us-east-1')

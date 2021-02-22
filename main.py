@@ -3,7 +3,7 @@ import numpy as np
 import keyboard
 
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 flag = False
 
 while(1):
@@ -63,7 +63,8 @@ if(flag):
 
 # Amazon Textract client
 
-textract = boto3.client('textract', region_name='us-east-1')
+textract = boto3.client('textract', region_name='us-east-1',aws_access_key_id=ACCESS_KEY,
+                      aws_secret_access_key=SECRET_KEY)
 
 # Call Amazon Textract
 response = textract.detect_document_text(
@@ -96,7 +97,8 @@ def play(text):
     print("saved")
 
 def translate(Englishtext):
-    translate = boto3.client('translate')
+    translate = boto3.client('translate',region_name='us-east-1',aws_access_key_id=ACCESS_KEY,
+                      aws_secret_access_key=SECRET_KEY)
     result = translate.translate_text(Text=Englishtext,
                                   SourceLanguageCode="en",
                                   TargetLanguageCode="ml")
@@ -111,12 +113,16 @@ def translate(Englishtext):
 if(contentFlag):
     translate(content)
     print(updatedMalayalam)
-from audioplayer import AudioPlayer
-
-# Playback stops when the object is destroyed (GC'ed), so save a reference to the object for non-blocking playback.
+    
+def playMusic(file):
+    from soundplayer import SoundPlayer
+    p = SoundPlayer(file, 1)        
+    print("playing"+file)
+    p.play() # non-blocking, volume = 0.5
+    print ("done")
+    
 if(contentFlag):
-    AudioPlayer("hello.mp3").play(block=True)
+    playMusic("hello.mp3")
     flag = False
     uploadFlag = False
     contentFlag = False
-
