@@ -1,10 +1,18 @@
 import cv2
 import numpy as np
 import keyboard
+import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 
 
 cap = cv2.VideoCapture(0)
 flag = False
+GPIO.setwarnings(False) # Ignore warning for now
+GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
+
+GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 10 to be an input pin and set initial value to be pulled low (off)\
+GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+print("Button Intialised")
+#button 10 select key
 
 while(1):
     ret, frame = cap.read()
@@ -13,7 +21,7 @@ while(1):
     edged_frame = cv2.Canny(frame,100,200)
     cv2.imshow('Edges',edged_frame)
     k= cv2.waitKey(5) & 0xFF
-    if keyboard.is_pressed('q'):  # if key 'q' is pressed 
+    if GPIO.input(10) == GPIO.HIGH:
         print('You Pressed A Key!')
         cv2.imwrite('images/c1.png',frame)
         flag = True
