@@ -1,9 +1,11 @@
+<<<<<<< HEAD
+=======
 import cv2
 import numpy as np
 import keyboard
 
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 while(1):
     ret, frame = cap.read()
@@ -24,3 +26,4 @@ while(1):
         break
 cap.release()
 cv2.destroyAllWindows()
+>>>>>>> 0a0c9c069769c0f372876ea4b65c8f46e001acb4

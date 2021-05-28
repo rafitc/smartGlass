@@ -1,19 +1,54 @@
 import cv2
 import numpy as np
-import keyboard
+import RPi.GPIO as GPIO
+import os
 
-
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 flag = False
 
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+import os.path 
+
+lang_full = ("english", "Gujarati", "Hindi", "Kannada", "Malayalam", "tamil", "urdu")
+lang_code = {"en", "gu", "hi", "kn", "ml", "ta", "ur"}
+
+lang_file = open("lang.txt", "wb")
+if os.path.isfile("lang.txt"):
+    print("file exist no ne")
+else:
+    fo = open("foo.txt", "wb")
+    fo.write("0")
+    print("created file and wrote 0")
+
+os.system("play audio/hello.mp3")
+str = fo.read(1);
+lang_num = int(str)
+print("Selected lang : ")
+print(lang_full[int(str)]) 
+
+curr_lang = lang_code[lang_num]
 while(1):
+    if GPIO.input(11) == GPIO.HIGH:
+        print("next lang")
+        if (lang_num>6):
+            lang_num = 0;
+
+        print(lang_code[lang_num])
+        curr_lang = lang_code[lang_num]
+        fo = open("foo.txt", "wb")
+        fo.write(lang_num)
+
     ret, frame = cap.read()
     gray_vid = cv2.cvtColor(frame, cv2.IMREAD_GRAYSCALE)
     cv2.imshow('Original',frame)
     edged_frame = cv2.Canny(frame,100,200)
     cv2.imshow('Edges',edged_frame)
     k= cv2.waitKey(5) & 0xFF
-    if keyboard.is_pressed('q'):  # if key 'q' is pressed 
+    if GPIO.input(10) == GPIO.HIGH:
         print('You Pressed A Key!')
         cv2.imwrite('images/c1.png',frame)
         flag = True
@@ -21,8 +56,8 @@ while(1):
     
 # Quit with 'Esc' key
     
-    if k==27:
-        break
+    #if k==27:
+     #   break
 cap.release()
 cv2.destroyAllWindows()
 
@@ -63,7 +98,8 @@ if(flag):
 
 # Amazon Textract client
 
-textract = boto3.client('textract', region_name='us-east-1')
+textract = boto3.client('textract', region_name='us-east-1',aws_access_key_id=ACCESS_KEY,
+                      aws_secret_access_key=SECRET_KEY)
 
 # Call Amazon Textract
 response = textract.detect_document_text(
@@ -85,23 +121,24 @@ if(uploadFlag):
         if item["BlockType"] == "LINE":
             content +=  item["Text"]
 if(len(content)>2):
-    print(content)
+    print(content.encode('utf-8'))
     contentFlag = True;
 
 
 from gtts import gTTS
 def play(text):
-    tts = gTTS(text, lang='ml')
+    tts = gTTS(text, lang='ta')
     tts.save('hello.mp3')
     print("saved")
 
 def translate(Englishtext):
-    translate = boto3.client('translate')
+    translate = boto3.client('translate',region_name='us-east-1',aws_access_key_id=ACCESS_KEY,
+                      aws_secret_access_key=SECRET_KEY)
     result = translate.translate_text(Text=Englishtext,
                                   SourceLanguageCode="en",
-                                  TargetLanguageCode="ml")
+                                  TargetLanguageCode="ta")
     malayalam= result["TranslatedText"]
-    print(malayalam)
+    print(malayalam.encode('utf-8'))
     print(len(malayalam))
     play(malayalam)
     #print(updatedMalayalam)
@@ -111,12 +148,17 @@ def translate(Englishtext):
 if(contentFlag):
     translate(content)
     print(updatedMalayalam)
-from audioplayer import AudioPlayer
+    
+def playMusic(file):
+    from soundplayer import SoundPlayer
+    p = SoundPlayer(file, 1)        
+    print("playing"+file)
+    p.play() # non-blocking, volume = 0.5
+    print ("done")
 
-# Playback stops when the object is destroyed (GC'ed), so save a reference to the object for non-blocking playback.
 if(contentFlag):
-    AudioPlayer("hello.mp3").play(block=True)
+    os.system("play hello.mp3")
+    #playMusic("hello.mp3")
     flag = False
     uploadFlag = False
     contentFlag = False
-
