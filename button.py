@@ -14,4 +14,4 @@ while(1):
         count += count 
     if GPIO.input(11) == GPIO.HIGH:
         print("Button two was pushed!")
-        count -= count 
+        count -= count

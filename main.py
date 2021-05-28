@@ -1,20 +1,47 @@
 import cv2
 import numpy as np
-import keyboard
-import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
-
+import RPi.GPIO as GPIO
+import os
 
 cap = cv2.VideoCapture(0)
 flag = False
-GPIO.setwarnings(False) # Ignore warning for now
-GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
 
-GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 10 to be an input pin and set initial value to be pulled low (off)\
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-print("Button Intialised")
-#button 10 select key
 
+import os.path 
+
+lang_full = ("english", "Gujarati", "Hindi", "Kannada", "Malayalam", "tamil", "urdu")
+lang_code = {"en", "gu", "hi", "kn", "ml", "ta", "ur"}
+
+lang_file = open("lang.txt", "wb")
+if os.path.isfile("lang.txt"):
+    print("file exist no ne")
+else:
+    fo = open("foo.txt", "wb")
+    fo.write("0")
+    print("created file and wrote 0")
+
+os.system("play audio/hello.mp3")
+str = fo.read(1);
+lang_num = int(str)
+print("Selected lang : ")
+print(lang_full[int(str)]) 
+
+curr_lang = lang_code[lang_num]
 while(1):
+    if GPIO.input(11) == GPIO.HIGH:
+        print("next lang")
+        if (lang_num>6):
+            lang_num = 0;
+
+        print(lang_code[lang_num])
+        curr_lang = lang_code[lang_num]
+        fo = open("foo.txt", "wb")
+        fo.write(lang_num)
+
     ret, frame = cap.read()
     gray_vid = cv2.cvtColor(frame, cv2.IMREAD_GRAYSCALE)
     cv2.imshow('Original',frame)
@@ -29,8 +56,8 @@ while(1):
     
 # Quit with 'Esc' key
     
-    if k==27:
-        break
+    #if k==27:
+     #   break
 cap.release()
 cv2.destroyAllWindows()
 
@@ -94,35 +121,32 @@ if(uploadFlag):
         if item["BlockType"] == "LINE":
             content +=  item["Text"]
 if(len(content)>2):
-    print(content)
+    print(content.encode('utf-8'))
     contentFlag = True;
 
 
 from gtts import gTTS
-def textToSpeech(text):
-    tts = gTTS(text, lang='ml')
+def play(text):
+    tts = gTTS(text, lang='ta')
     tts.save('hello.mp3')
     print("saved")
 
-def translate(Englishtext, source_lan, target_lan):
+def translate(Englishtext):
     translate = boto3.client('translate',region_name='us-east-1',aws_access_key_id=ACCESS_KEY,
                       aws_secret_access_key=SECRET_KEY)
     result = translate.translate_text(Text=Englishtext,
-                                  SourceLanguageCode = source_lan,
-                                  TargetLanguageCode = target_lan)
+                                  SourceLanguageCode="en",
+                                  TargetLanguageCode="ta")
     malayalam= result["TranslatedText"]
-    print(malayalam)
+    print(malayalam.encode('utf-8'))
     print(len(malayalam))
-    textToSpeech(malayalam)
+    play(malayalam)
     #print(updatedMalayalam)
     #print(f'TranslatedText: {result["TranslatedText"]}')
     #print(f'SourceLanguageCode: {result["SourceLanguageCode"]}')
     #print(f'TargetLanguageCode: {result["TargetLanguageCode"]}')
-SOURCE_LAN = "en" 
-TARGET_LAN = "ml"
-
 if(contentFlag):
-    translate(content, SOURCE_LAN, TARGET_LAN)
+    translate(content)
     print(updatedMalayalam)
     
 def playMusic(file):
@@ -131,9 +155,10 @@ def playMusic(file):
     print("playing"+file)
     p.play() # non-blocking, volume = 0.5
     print ("done")
-    
+
 if(contentFlag):
-    playMusic("hello.mp3")
+    os.system("play hello.mp3")
+    #playMusic("hello.mp3")
     flag = False
     uploadFlag = False
     contentFlag = False
